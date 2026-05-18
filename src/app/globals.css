@@ -6,10 +6,10 @@
   --primary: #3b82f6;
   --primary-hover: #2563eb;
   --secondary: #64748b;
-  --success: #10b981;
-  --heading: #10b981;
-  --text-heading: #10b981;
-  --heading-color: #10b981;
+  --success: #FFFFFF;
+  --heading: #FFFFFF;
+  --text-heading: #FFFFFF;
+  --heading-color: #FFFFFF;
   --warning: #f59e0b;
   --error: #ef4444;
   --surface: #f8fafc;
@@ -53,7 +53,7 @@ main {
 }
 
 h1, h2, h3 {
-  color: var(--heading-color, #10b981);
+  color: var(--heading-color, #FFFFFF);
 }
 
 @layer components {
