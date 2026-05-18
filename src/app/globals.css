@@ -7,6 +7,9 @@
   --primary-hover: #2563eb;
   --secondary: #64748b;
   --success: #10b981;
+  --heading: #10b981;
+  --text-heading: #10b981;
+  --heading-color: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
   --surface: #f8fafc;
@@ -47,6 +50,10 @@ body {
 
 main {
   flex: 1;
+}
+
+h1, h2, h3 {
+  color: var(--heading-color, #10b981);
 }
 
 @layer components {
