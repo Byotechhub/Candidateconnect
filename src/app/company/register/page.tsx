@@ -43,15 +43,14 @@ export default function CompanyRegisterPage() {
 
     setIsLoading(true);
     try {
-      await register(
-        {
-          name: formData.name,
-          industry: formData.industry,
-          description: formData.description,
-          website: formData.website,
-        },
-        formData.password
-      );
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        industry: formData.industry,
+        description: formData.description,
+        website: formData.website,
+      });
       router.push('/company/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -100,7 +99,6 @@ export default function CompanyRegisterPage() {
                 value={formData.industry}
                 onChange={handleChange}
                 placeholder="Technology"
-                required
               />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -111,7 +109,6 @@ export default function CompanyRegisterPage() {
                   rows={3}
                   className="input-field"
                   placeholder="Tell candidates about your company..."
-                  required
                 />
               </div>
               <Input

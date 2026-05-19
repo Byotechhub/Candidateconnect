@@ -1,21 +1,48 @@
 import { Candidate, Company, Role, Application, Match } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://candidateconnect-api.onrender.com';
+
+// Get JWT token from localStorage
+export function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('company_token');
+}
+
+// Set JWT token
+export function setAuthToken(token: string): void {
+  localStorage.setItem('company_token', token);
+}
+
+// Clear JWT token
+export function clearAuthToken(): void {
+  localStorage.removeItem('company_token');
+}
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string>),
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.statusText}`);
+    const error = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(error.detail || `API Error: ${response.statusText}`);
   }
 
-  return response.json();
+  // Handle empty responses
+  const text = await response.text();
+  if (!text) return {} as T;
+  return JSON.parse(text);
 }
 
 // Candidates API
@@ -47,6 +74,8 @@ export const rolesApi = {
   get: (id: number) => fetchApi<Role>(`/roles/${id}`),
   create: (data: Omit<Role, 'id'>) =>
     fetchApi<Role>('/roles', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: number, data: Partial<Role>) =>
+    fetchApi<Role>(`/roles/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 };
 
 // Applications API
@@ -72,6 +101,20 @@ export const companiesApi = {
   get: (id: number) => fetchApi<Company>(`/companies/${id}`),
   create: (data: Omit<Company, 'id'>) =>
     fetchApi<Company>('/companies', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// Auth API - for direct calls
+export const authApi = {
+  login: (email: string, password: string) =>
+    fetchApi<{ access_token: string; token_type: string; company: Company }>('/companies/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  register: (data: { name: string; email: string; password: string; industry?: string; description?: string; website?: string }) =>
+    fetchApi<{ access_token: string; token_type: string; company: Company }>('/companies/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 export { fetchApi };

@@ -1,13 +1,14 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Company, CompanyAuth } from '@/types';
+import { Company } from '@/types';
+import { authApi, setAuthToken, clearAuthToken, getAuthToken } from '@/lib/api';
 
 interface AuthContextType {
   company: Company | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (companyData: Omit<Company, 'id' | 'created_at'>, password: string) => Promise<void>;
+  register: (data: { name: string; email: string; password: string; industry?: string; description?: string; website?: string }) => Promise<void>;
   logout: () => void;
 }
 
@@ -18,52 +19,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for existing session
+    // Check localStorage for existing session and token
     const stored = localStorage.getItem('company_auth');
-    if (stored) {
+    const token = getAuthToken();
+    if (stored && token) {
       try {
         setCompany(JSON.parse(stored));
       } catch {
         localStorage.removeItem('company_auth');
+        clearAuthToken();
       }
     }
     setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
-    // TODO: Replace with actual API call when backend auth is ready
-    // For now, simulate login by checking localStorage for registered company
-    const registeredCompanies = JSON.parse(localStorage.getItem('registered_companies') || '[]');
-    const found = registeredCompanies.find((c: CompanyAuth) => c.email === email && c.password === password);
-    
-    if (found) {
-      const { password: _, ...companyData } = found;
-      setCompany(companyData);
-      localStorage.setItem('company_auth', JSON.stringify(companyData));
-    } else {
-      throw new Error('Invalid email or password');
-    }
+    const response = await authApi.login(email, password);
+    setAuthToken(response.access_token);
+    setCompany(response.company);
+    localStorage.setItem('company_auth', JSON.stringify(response.company));
   };
 
-  const register = async (companyData: Omit<Company, 'id' | 'created_at'>, password: string) => {
-    // TODO: Replace with actual API call
-    const newCompany = {
-      ...companyData,
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-    };
-    
-    // Store in localStorage for demo purposes
-    const registeredCompanies = JSON.parse(localStorage.getItem('registered_companies') || '[]');
-    registeredCompanies.push({ ...newCompany, password } as CompanyAuth);
-    localStorage.setItem('registered_companies', JSON.stringify(registeredCompanies));
-    
-    setCompany(newCompany);
-    localStorage.setItem('company_auth', JSON.stringify(newCompany));
+  const register = async (data: { name: string; email: string; password: string; industry?: string; description?: string; website?: string }) => {
+    const response = await authApi.register(data);
+    setAuthToken(response.access_token);
+    setCompany(response.company);
+    localStorage.setItem('company_auth', JSON.stringify(response.company));
   };
 
   const logout = () => {
     setCompany(null);
+    clearAuthToken();
     localStorage.removeItem('company_auth');
   };
 
