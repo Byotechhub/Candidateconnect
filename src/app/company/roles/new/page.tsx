@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { RoleForm } from '@/components/forms/RoleForm';
 import { Role } from '@/types';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
-export default function PostRolePage() {
+function PostRoleContent() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,5 +61,13 @@ export default function PostRolePage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function PostRolePage() {
+  return (
+    <ProtectedRoute>
+      <PostRoleContent />
+    </ProtectedRoute>
   );
 }

@@ -19,6 +19,12 @@ export interface Company {
   created_at?: string;
 }
 
+// Extended Company for authentication (localStorage storage)
+export interface CompanyAuth extends Company {
+  email: string;
+  password: string;
+}
+
 export interface Role {
   id: number;
   company_id: number;

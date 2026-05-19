@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button, Card, CardContent, CardHeader, CardFooter, Input } from '@/components/ui';
 import { Role, Application } from '@/types';
+import { useAuth } from '@/lib/auth';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
-export default function CompanyDashboardPage() {
+function DashboardContent() {
+  const { company, logout } = useAuth();
   const [roles, setRoles] = useState<Role[]>([]);
   const [recentApplications, setRecentApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,11 +63,14 @@ export default function CompanyDashboardPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Company Dashboard</h1>
-              <p className="text-gray-500">Manage your posted roles and applications</p>
+              <p className="text-gray-500">Welcome, {company?.name}</p>
             </div>
-            <Button onClick={() => setShowRoleForm(true)}>
-              + Post New Role
-            </Button>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={logout}>Logout</Button>
+              <Button onClick={() => setShowRoleForm(true)}>
+                + Post New Role
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -186,6 +192,14 @@ export default function CompanyDashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CompanyDashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }
 
