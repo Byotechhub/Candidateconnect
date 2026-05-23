@@ -1,6 +1,6 @@
 import { Candidate, Company, Role, Application, Match } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://candidateconnect-api.onrender.com';
+const API_BASE = 'https://candidateconnect-api.onrender.com';
 
 // Get JWT token from localStorage
 export function getAuthToken(): string | null {
